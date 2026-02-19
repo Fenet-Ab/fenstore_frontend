@@ -20,6 +20,9 @@ interface Material {
   createdAt: string;
   averageRating?: number;
   ratingCount?: number;
+  sizes?: string[];
+  colors?: string[];
+  storages?: string[];
 }
 
 export default function Home() {
@@ -77,6 +80,10 @@ export default function Home() {
         brand: `FenStore ${categoryName}`,
         averageRating: item.averageRating || 0,
         ratingCount: item.ratingCount || 0,
+        sizes: item.sizes || [],
+        colors: item.colors || [],
+        storages: item.storages || [],
+        category: item.category,
       }));
   };
 

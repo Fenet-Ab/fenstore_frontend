@@ -69,7 +69,7 @@ export default function AdminDashboard() {
     const router = useRouter();
 
     const fetchNotifications = async () => {
-        
+
 
         try {
             const token = localStorage.getItem("token");
@@ -849,9 +849,26 @@ export default function AdminDashboard() {
                                                                             </div>
                                                                         )}
                                                                     </div>
-                                                                    <p className="text-[10px] font-bold text-gray-500 truncate max-w-[120px] uppercase tracking-tighter" title={order.items.map((i: any) => i.material.title).join(", ")}>
-                                                                        {order.items.map((i: any) => i.material.title).join(", ")}
-                                                                    </p>
+                                                                    <div className="space-y-1">
+                                                                        {order.items.map((item: any, iIdx: number) => (
+                                                                            <div key={iIdx} className="flex flex-col">
+                                                                                <p className="text-[10px] font-bold text-gray-200 uppercase tracking-tighter">
+                                                                                    {item.quantity}x {item.material.title}
+                                                                                </p>
+                                                                                <div className="flex flex-wrap gap-1">
+                                                                                    {item.selectedSize && (
+                                                                                        <span className="text-[8px] bg-gray-800 px-1 rounded text-gray-400">S: {item.selectedSize}</span>
+                                                                                    )}
+                                                                                    {item.selectedStorage && (
+                                                                                        <span className="text-[8px] bg-gray-800 px-1 rounded text-gray-400">T: {item.selectedStorage}</span>
+                                                                                    )}
+                                                                                    {item.selectedColor && (
+                                                                                        <span className="text-[8px] bg-gray-800 px-1 rounded text-gray-400">C: {item.selectedColor}</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
                                                                 </div>
                                                             </td>
                                                             <td className="px-8 py-6">

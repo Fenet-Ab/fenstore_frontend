@@ -19,6 +19,9 @@ interface Material {
     categoryId: string;
     category?: Category;
     createdAt?: string;
+    sizes?: string[];
+    colors?: string[];
+    storages?: string[];
 }
 
 interface ProductModalProps {
@@ -47,6 +50,11 @@ export default function ProductModal({
     const [error, setError] = useState("");
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+    // Variant states
+    const [sizes, setSizes] = useState("");
+    const [colors, setColors] = useState("");
+    const [storages, setStorages] = useState("");
+
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
@@ -56,6 +64,9 @@ export default function ProductModal({
                 setDescription(material.description);
                 setCategoryId(material.categoryId);
                 setImagePreview(material.imageUrl);
+                setSizes(material.sizes?.join(', ') || "");
+                setColors(material.colors?.join(', ') || "");
+                setStorages(material.storages?.join(', ') || "");
             } else {
                 resetForm();
             }
@@ -83,6 +94,9 @@ export default function ProductModal({
         setImagePreview("");
         setError("");
         setLoading(false);
+        setSizes("");
+        setColors("");
+        setStorages("");
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,6 +129,15 @@ export default function ProductModal({
             formData.append('price', price);
             formData.append('description', description);
             formData.append('categoryId', categoryId);
+
+            // Convert comma-separated strings to JSON arrays
+            const sizesArray = sizes.split(',').map(s => s.trim()).filter(s => s !== "");
+            const colorsArray = colors.split(',').map(s => s.trim()).filter(s => s !== "");
+            const storagesArray = storages.split(',').map(s => s.trim()).filter(s => s !== "");
+
+            formData.append('sizes', JSON.stringify(sizesArray));
+            formData.append('colors', JSON.stringify(colorsArray));
+            formData.append('storages', JSON.stringify(storagesArray));
 
             if (image) {
                 formData.append('image', image);
@@ -152,6 +175,21 @@ export default function ProductModal({
             setError(err.message || 'An error occurred');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const isSizeCategory = categories.find(c => c.id === categoryId)?.name.toLowerCase().match(/clothe|clothing|shoes/);
+
+    const quickSizes = {
+        clothes: ["S", "M", "L", "XL", "XXL"],
+        shoes: ["39", "40", "41", "42", "43", "44"]
+    };
+
+    const addQuickSize = (size: string) => {
+        const currentSizes = sizes.split(',').map(s => s.trim()).filter(s => s !== "");
+        if (!currentSizes.includes(size)) {
+            const newSizes = [...currentSizes, size].join(', ');
+            setSizes(newSizes);
         }
     };
 
@@ -314,6 +352,61 @@ export default function ProductModal({
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Variants Section */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className={`space-y-2 p-4 rounded-2xl transition-all ${isSizeCategory ? 'bg-[#D4AF37]/5 border border-[#D4AF37]/20 shadow-lg shadow-[#D4AF37]/5' : ''}`}>
+                                <label className="flex items-center justify-between text-sm font-bold text-gray-300">
+                                    <span>Sizes {isSizeCategory ? <span className="text-[#D4AF37] ml-2 animate-pulse">(Recommended)</span> : '(Optional)'}</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={sizes}
+                                    onChange={(e) => setSizes(e.target.value)}
+                                    className={`w-full bg-[#0F0F0F] border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/20 transition-all text-sm ${isSizeCategory ? 'border-[#D4AF37]/30' : ''}`}
+                                    placeholder={isSizeCategory ? "Enter sizes for this item..." : "e.g. S, M, L, XL or 40, 41, 42"}
+                                />
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {isSizeCategory && (
+                                        (categories.find(c => c.id === categoryId)?.name.toLowerCase().includes('shoe') ? quickSizes.shoes : quickSizes.clothes).map(s => (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                onClick={() => addQuickSize(s)}
+                                                className="px-2.5 py-1 rounded-lg bg-[#1A1A1A] border border-gray-800 text-[10px] font-black text-gray-400 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all"
+                                            >
+                                                +{s}
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-1">Separate with commas</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-gray-300">Storages (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={storages}
+                                    onChange={(e) => setStorages(e.target.value)}
+                                    className="w-full bg-[#0F0F0F] border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/20 transition-all text-sm"
+                                    placeholder="e.g. 128GB, 256GB, 512GB"
+                                />
+                                <p className="text-[10px] text-gray-500">Separate with commas</p>
+                            </div>
+
+                            <div className="space-y-2 md:col-span-2">
+                                <label className="block text-sm font-bold text-gray-300">Colors (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={colors}
+                                    onChange={(e) => setColors(e.target.value)}
+                                    className="w-full bg-[#0F0F0F] border border-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/20 transition-all text-sm"
+                                    placeholder="e.g. Black, White, #FF0000, Gold"
+                                />
+                                <p className="text-[10px] text-gray-500">Separate with commas. You can use names or hex codes.</p>
                             </div>
                         </div>
 

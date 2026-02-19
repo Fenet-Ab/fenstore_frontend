@@ -8,6 +8,10 @@ interface Product {
     image: string;
     averageRating?: number;
     ratingCount?: number;
+    sizes?: string[];
+    colors?: string[];
+    storages?: string[];
+    category?: { name: string };
 }
 
 interface CategorySectionProps {

@@ -7,6 +7,9 @@ import { toast } from "react-toastify";
 interface CartItem {
     id: string;
     quantity: number;
+    selectedSize?: string;
+    selectedColor?: string;
+    selectedStorage?: string;
     material: {
         id: string;
         title: string;
@@ -21,9 +24,9 @@ interface CartItem {
 interface CartContextType {
     cart: { items: CartItem[] } | null;
     loading: boolean;
-    addToCart: (materialId: string) => Promise<void>;
-    removeFromCart: (materialId: string) => Promise<void>;
-    deleteFromCart: (materialId: string) => Promise<void>;
+    addToCart: (materialId: string, options?: { selectedSize?: string, selectedColor?: string, selectedStorage?: string }) => Promise<void>;
+    removeFromCart: (materialId: string, options?: { selectedSize?: string, selectedColor?: string, selectedStorage?: string }) => Promise<void>;
+    deleteFromCart: (materialId: string, options?: { selectedSize?: string, selectedColor?: string, selectedStorage?: string }) => Promise<void>;
     refreshCart: () => Promise<void>;
 }
 
@@ -69,7 +72,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         refreshCart();
     }, [isLoggedIn]);
 
-    const addToCart = async (materialId: string) => {
+    const addToCart = async (materialId: string, options?: { selectedSize?: string, selectedColor?: string, selectedStorage?: string }) => {
         if (!isLoggedIn) {
             toast.info("Please login to add items to cart");
             return;
@@ -83,7 +86,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ materialId }),
+                body: JSON.stringify({ materialId, ...options }),
             });
 
             if (response.ok) {
@@ -98,7 +101,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const removeFromCart = async (materialId: string) => {
+    const removeFromCart = async (materialId: string, options?: { selectedSize?: string, selectedColor?: string, selectedStorage?: string }) => {
         if (!isLoggedIn) return;
         try {
             const token = localStorage.getItem("token");
@@ -108,7 +111,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ materialId }),
+                body: JSON.stringify({ materialId, ...options }),
             });
 
             if (response.ok) {
@@ -120,7 +123,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const deleteFromCart = async (materialId: string) => {
+    const deleteFromCart = async (materialId: string, options?: { selectedSize?: string, selectedColor?: string, selectedStorage?: string }) => {
         if (!isLoggedIn) return;
         const loadingToast = toast.loading("Removing item...");
         try {
@@ -131,7 +134,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ materialId }),
+                body: JSON.stringify({ materialId, ...options }),
             });
 
             if (response.ok) {
