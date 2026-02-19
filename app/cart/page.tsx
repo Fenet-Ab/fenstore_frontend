@@ -183,25 +183,65 @@ export default function CartPage() {
                                     <div className="flex-1 space-y-2 text-center sm:text-left">
                                         <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em]">{item.material.category?.name || 'Exclusive'}</p>
                                         <h3 className="text-xl font-black text-[#1A1A1A]">{item.material.title}</h3>
+
+                                        {/* Variant Display */}
+                                        <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                                            {item.selectedSize && (
+                                                <span className="text-[10px] font-black uppercase bg-gray-100 px-2 py-1 rounded-md text-gray-500">
+                                                    Size: {item.selectedSize}
+                                                </span>
+                                            )}
+                                            {item.selectedStorage && (
+                                                <span className="text-[10px] font-black uppercase bg-gray-100 px-2 py-1 rounded-md text-gray-500">
+                                                    Storage: {item.selectedStorage}
+                                                </span>
+                                            )}
+                                            {item.selectedColor && (
+                                                <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
+                                                    <span className="text-[10px] font-black uppercase text-gray-500">Color:</span>
+                                                    <div
+                                                        className="w-3 h-3 rounded-full border border-gray-200"
+                                                        style={{ backgroundColor: item.selectedColor.startsWith('#') ? item.selectedColor : 'transparent' }}
+                                                    >
+                                                        {!item.selectedColor.startsWith('#') && (
+                                                            <span className="text-[6px] flex items-center justify-center h-full text-gray-500">{item.selectedColor.slice(0, 1)}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <p className="text-lg font-bold text-gray-900">{item.material.price.toLocaleString()} <span className="text-xs text-[#D4AF37]">ETB</span></p>
                                     </div>
                                     <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100">
                                         <button
-                                            onClick={() => removeFromCart(item.material.id)}
+                                            onClick={() => removeFromCart(item.material.id, {
+                                                selectedSize: item.selectedSize,
+                                                selectedColor: item.selectedColor,
+                                                selectedStorage: item.selectedStorage
+                                            })}
                                             className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 hover:text-[#D4AF37] hover:shadow-sm transition-all"
                                         >
                                             <Minus className="w-4 h-4" />
                                         </button>
                                         <span className="w-8 text-center font-black text-[#1A1A1A]">{item.quantity}</span>
                                         <button
-                                            onClick={() => addToCart(item.material.id)}
+                                            onClick={() => addToCart(item.material.id, {
+                                                selectedSize: item.selectedSize,
+                                                selectedColor: item.selectedColor,
+                                                selectedStorage: item.selectedStorage
+                                            })}
                                             className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 hover:text-[#D4AF37] hover:shadow-sm transition-all"
                                         >
                                             <Plus className="w-4 h-4" />
                                         </button>
                                     </div>
                                     <button
-                                        onClick={() => deleteFromCart(item.material.id)}
+                                        onClick={() => deleteFromCart(item.material.id, {
+                                            selectedSize: item.selectedSize,
+                                            selectedColor: item.selectedColor,
+                                            selectedStorage: item.selectedStorage
+                                        })}
                                         className="p-4 text-gray-300 hover:text-red-500 transition-colors"
                                     >
                                         <Trash2 className="w-5 h-5" />

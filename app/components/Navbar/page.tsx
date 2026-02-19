@@ -37,6 +37,7 @@ export default function Navbar() {
     { name: "Clothes", href: "/category/clothes" },
     { name: "Shoes", href: "/category/shoes" },
     { name: "Accessories", href: "/category/accessories" },
+    { name: "About", href: "/about" },
   ];
 
   const handleProfileClick = () => {

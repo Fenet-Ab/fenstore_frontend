@@ -19,6 +19,9 @@ interface Material {
     createdAt: string;
     averageRating?: number;
     ratingCount?: number;
+    sizes?: string[];
+    colors?: string[];
+    storages?: string[];
 }
 
 const Accessories = () => {
@@ -110,6 +113,10 @@ const Accessories = () => {
                                 image={material.imageUrl}
                                 averageRating={material.averageRating || 0}
                                 ratingCount={material.ratingCount || 0}
+                                sizes={material.sizes}
+                                colors={material.colors}
+                                storages={material.storages}
+                                category={material.category}
                                 brand="FenStore Accessories"
                             />
                         ))}

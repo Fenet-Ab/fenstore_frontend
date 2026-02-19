@@ -14,6 +14,10 @@ interface ProductCardProps {
     brand?: string;
     averageRating?: number;
     ratingCount?: number;
+    category?: { name: string };
+    sizes?: string[];
+    colors?: string[];
+    storages?: string[];
 }
 
 export default function ProductCard({
@@ -24,12 +28,22 @@ export default function ProductCard({
     brand = "FenStore Premium",
     averageRating = 0,
     ratingCount = 0,
+    category,
+    sizes,
+    colors,
+    storages,
 }: ProductCardProps) {
     const { addToCart } = useCart();
     const { isLoggedIn } = useAuth();
     const [adding, setAdding] = useState(false);
     const [liked, setLiked] = useState(false);
     const [likeLoading, setLikeLoading] = useState(false);
+    const [showQuickSelect, setShowQuickSelect] = useState(false);
+    const [selectedSize, setSelectedSize] = useState("");
+    const [selectedColor, setSelectedColor] = useState("");
+    const [selectedStorage, setSelectedStorage] = useState("");
+
+    const hasOptions = (sizes?.length ?? 0) > 0 || (colors?.length ?? 0) > 0 || (storages?.length ?? 0) > 0;
 
     useEffect(() => {
         // Check if item is liked on mount
@@ -53,9 +67,19 @@ export default function ProductCard({
     }, [isLoggedIn, id]);
 
     const handleAddToCart = async () => {
+        if (hasOptions && !showQuickSelect) {
+            setShowQuickSelect(true);
+            return;
+        }
+
         setAdding(true);
-        await addToCart(id);
+        await addToCart(id, {
+            selectedSize,
+            selectedColor,
+            selectedStorage
+        });
         setAdding(false);
+        setShowQuickSelect(false);
     };
 
     const handleToggleLike = async () => {
@@ -157,6 +181,103 @@ export default function ProductCard({
                     {price.toLocaleString()} <span className="text-[9px] font-medium text-gray-400">ETB</span>
                 </p>
             </div>
+
+            {/* Quick Select Modal */}
+            {showQuickSelect && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="p-8 space-y-6">
+                            <div className="text-center space-y-2">
+                                <h4 className="text-xl font-black text-[#1A1A1A] uppercase tracking-tighter">Customize Your Order</h4>
+                                <p className="text-xs text-gray-500 font-medium">Please select your preferences for <b>{name}</b></p>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Size Selection */}
+                                {sizes && sizes.length > 0 && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Select Size</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {sizes.map((size) => (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => setSelectedSize(size)}
+                                                    className={`px-4 py-2 text-xs font-bold border rounded-xl transition-all ${selectedSize === size
+                                                        ? "bg-[#D4AF37] border-[#D4AF37] text-white"
+                                                        : "border-gray-200 text-gray-600 hover:border-[#D4AF37]"
+                                                        }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Storage Selection */}
+                                {storages && storages.length > 0 && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Storage / RAM</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {storages.map((storage) => (
+                                                <button
+                                                    key={storage}
+                                                    onClick={() => setSelectedStorage(storage)}
+                                                    className={`px-4 py-2 text-xs font-bold border rounded-xl transition-all ${selectedStorage === storage
+                                                        ? "bg-[#1A1A1A] border-[#1A1A1A] text-white"
+                                                        : "border-gray-200 text-gray-600 hover:border-[#1A1A1A]"
+                                                        }`}
+                                                >
+                                                    {storage}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Color Selection */}
+                                {colors && colors.length > 0 && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Select Color</label>
+                                        <div className="flex flex-wrap gap-3">
+                                            {colors.map((color) => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setSelectedColor(color)}
+                                                    className={`w-8 h-8 rounded-full border-2 transition-all p-0.5 ${selectedColor === color ? "border-[#D4AF37]" : "border-transparent"
+                                                        }`}
+                                                    title={color}
+                                                >
+                                                    <div
+                                                        className="w-full h-full rounded-full border border-gray-100"
+                                                        style={{ backgroundColor: color.startsWith('#') ? color : color.toLowerCase() }}
+                                                    ></div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowQuickSelect(false)}
+                                    className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#1A1A1A] transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={adding || (!!sizes?.length && !selectedSize) || (!!storages?.length && !selectedStorage)}
+                                    className="flex-1 bg-[#D4AF37] text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-[#D4AF37]/20 hover:bg-[#B8860B] transition-all disabled:opacity-50 disabled:grayscale"
+                                >
+                                    {adding ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Confirm Add"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

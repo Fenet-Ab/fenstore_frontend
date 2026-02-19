@@ -23,6 +23,9 @@ interface Material {
     createdAt: string;
     averageRating?: number;
     ratingCount?: number;
+    sizes?: string[];
+    colors?: string[];
+    storages?: string[];
 }
 
 interface RatingStats {
@@ -45,6 +48,11 @@ export default function ProductDetail() {
     const [isRating, setIsRating] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false); // Success state
     const [ratingComment, setRatingComment] = useState("");
+
+    // Variant states
+    const [selectedSize, setSelectedSize] = useState<string>("");
+    const [selectedColor, setSelectedColor] = useState<string>("");
+    const [selectedStorage, setSelectedStorage] = useState<string>("");
 
     const fetchProductData = async () => {
         try {
@@ -92,8 +100,23 @@ export default function ProductDetail() {
 
     const handleAddToCart = async () => {
         if (!product) return;
+
+        // Validation
+        if (product.sizes?.length && !selectedSize) {
+            toast.warning("Please select a size");
+            return;
+        }
+        if (product.storages?.length && !selectedStorage) {
+            toast.warning("Please select storage capacity");
+            return;
+        }
+
         setAdding(true);
-        await addToCart(product.id);
+        await addToCart(product.id, {
+            selectedSize,
+            selectedColor,
+            selectedStorage
+        });
         setAdding(false);
     };
 
@@ -219,6 +242,84 @@ export default function ProductDetail() {
                             <p className="text-gray-500 leading-relaxed text-lg pt-4">
                                 {product.description}
                             </p>
+
+                            {/* Variant Selectors */}
+                            <div className="space-y-6 pt-8">
+                                {/* Size Selector - clothes/shoes */}
+                                {product.sizes && product.sizes.length > 0 && (
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-sm font-black uppercase tracking-widest text-[#1A1A1A]">Select Size</label>
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Size Guide</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {product.sizes.map((size) => (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => setSelectedSize(size)}
+                                                    className={`min-w-[3.5rem] h-12 flex items-center justify-center rounded-xl font-bold transition-all border-2 ${selectedSize === size
+                                                            ? "border-[#D4AF37] bg-[#D4AF37] text-white"
+                                                            : "border-gray-100 text-gray-400 hover:border-[#D4AF37]"
+                                                        }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Storage Selector - electronics */}
+                                {product.storages && product.storages.length > 0 && (
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-black uppercase tracking-widest text-[#1A1A1A]">Select Storage</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {product.storages.map((storage) => (
+                                                <button
+                                                    key={storage}
+                                                    onClick={() => setSelectedStorage(storage)}
+                                                    className={`px-6 h-12 flex items-center justify-center rounded-xl font-bold transition-all border-2 ${selectedStorage === storage
+                                                            ? "border-[#D4AF37] bg-[#D4AF37] text-white"
+                                                            : "border-gray-100 text-gray-400 hover:border-[#D4AF37]"
+                                                        }`}
+                                                >
+                                                    {storage}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Color Selector - any */}
+                                {product.colors && product.colors.length > 0 && (
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-black uppercase tracking-widest text-[#1A1A1A]">Select Color</label>
+                                        <div className="flex flex-wrap gap-3">
+                                            {product.colors.map((color) => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setSelectedColor(color)}
+                                                    title={color}
+                                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all p-0.5 border-2 ${selectedColor === color
+                                                            ? "border-[#D4AF37]"
+                                                            : "border-transparent"
+                                                        }`}
+                                                >
+                                                    {/* If it's a valid hex color, show it, otherwise just a generic circle */}
+                                                    <div
+                                                        className="w-full h-full rounded-full border border-gray-100"
+                                                        style={{ backgroundColor: color.startsWith('#') ? color : 'transparent' }}
+                                                    >
+                                                        {!color.startsWith('#') && (
+                                                            <span className="text-[8px] font-black uppercase flex items-center justify-center h-full text-gray-500">{color.slice(0, 2)}</span>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Order Options */}
