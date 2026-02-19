@@ -37,7 +37,7 @@ export default function ProductCard({
             if (!isLoggedIn) return;
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`http://127.0.0.1:5000/api/like`, {
+                const res = await fetch(`https://fenstore-backend-1.onrender.com/api/like`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -67,7 +67,7 @@ export default function ProductCard({
         setLikeLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/like/${id}`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/like/${id}`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

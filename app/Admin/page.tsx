@@ -69,9 +69,11 @@ export default function AdminDashboard() {
     const router = useRouter();
 
     const fetchNotifications = async () => {
+        
+
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/notification", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/notification", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -86,7 +88,7 @@ export default function AdminDashboard() {
     const markAsRead = async (id: string) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/notification/${id}/read`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/notification/${id}/read`, {
                 method: "PATCH",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -101,7 +103,7 @@ export default function AdminDashboard() {
     const markAllRead = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/notification/read-all`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/notification/read-all`, {
                 method: "PATCH",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -133,7 +135,7 @@ export default function AdminDashboard() {
             const updateNotis = async () => {
                 try {
                     const t = localStorage.getItem("token");
-                    const res = await fetch("http://127.0.0.1:5000/api/notification", {
+                    const res = await fetch("https://fenstore-backend-1.onrender.com/api/notification", {
                         headers: { Authorization: `Bearer ${t}` }
                     });
                     if (res.ok) {
@@ -166,7 +168,7 @@ export default function AdminDashboard() {
         setMarketShareLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/order/admin/market-share", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/order/admin/market-share", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -187,7 +189,7 @@ export default function AdminDashboard() {
         setCustomersLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/profile/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/profile/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -221,7 +223,7 @@ export default function AdminDashboard() {
         setOrdersLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/order/admin/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/order/admin/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -246,7 +248,7 @@ export default function AdminDashboard() {
     const updateDeliveryStatus = async (orderId: string, status: string) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/order/delivery/${orderId}`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/order/delivery/${orderId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -270,7 +272,7 @@ export default function AdminDashboard() {
         setSupportLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/support/admin/conversations", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/support/admin/conversations", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -287,7 +289,7 @@ export default function AdminDashboard() {
     const fetchChatMessages = async (userId: string) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/support/admin/messages/${userId}`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/support/admin/messages/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -306,7 +308,7 @@ export default function AdminDashboard() {
         setIsReplying(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/support/admin/reply", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/support/admin/reply", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

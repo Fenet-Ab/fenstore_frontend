@@ -68,17 +68,7 @@ export default function Footer() {
                     <div className="lg:col-span-4 space-y-10">
 
 
-                        {/* <p className="text-xs text-gray-500">Subscribe for early access and exclusive offers.</p> */}
-                        {/* <div className="relative group">
-                                <input
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    className="w-full bg-white border border-gray-200 rounded-2xl py-4 pl-6 pr-14 text-sm focus:outline-none focus:border-[#D4AF37] transition-all shadow-sm"
-                                />
-                                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#D4AF37] text-white p-2.5 rounded-[14px] hover:bg-[#1A1A1A] transition-all shadow-xl">
-                                    <Send size={18} />
-                                </button>
-                            </div> */}
+                        
 
                         <h3 className="text-sm font-black text-[#1A1A1A] uppercase tracking-[0.2em]">Address</h3>
                         <div className="space-y-3 pt-4">

@@ -21,7 +21,7 @@ export default function CartPage() {
         try {
             const token = localStorage.getItem("token");
             if (!token) return;
-            const res = await fetch("http://127.0.0.1:5000/api/profile", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/profile", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -56,7 +56,7 @@ export default function CartPage() {
         const checkoutToast = toast.loading("Processing checkout...");
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://127.0.0.1:5000/api/order/checkout", {
+            const response = await fetch("https://fenstore-backend-1.onrender.com/api/order/checkout", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export default function CartPage() {
 
                 // Initialize payment
                 const userEmail = localStorage.getItem("email");
-                const paymentResponse = await fetch("http://127.0.0.1:5000/api/payment/initialize", {
+                const paymentResponse = await fetch("https://fenstore-backend-1.onrender.com/api/payment/initialize", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

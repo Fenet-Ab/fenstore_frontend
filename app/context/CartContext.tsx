@@ -29,7 +29,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const API_BASE_URL = "http://127.0.0.1:5000/api";
+const API_BASE_URL = "https://fenstore-backend-1.onrender.com/api";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const [cart, setCart] = useState<{ items: CartItem[] } | null>(null);

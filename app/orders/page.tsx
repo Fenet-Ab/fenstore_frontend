@@ -76,7 +76,7 @@ function OrdersList() {
         if (!isLoggedIn) return;
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://127.0.0.1:5000/api/order/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
+            const response = await fetch(`https://fenstore-backend-1.onrender.com/api/order/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -97,7 +97,7 @@ function OrdersList() {
         setDeleting(true);
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://127.0.0.1:5000/api/order/${deleteModal.orderId}`, {
+            const response = await fetch(`https://fenstore-backend-1.onrender.com/api/order/${deleteModal.orderId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -135,8 +135,8 @@ function OrdersList() {
                 const vToast = toast.loading("Verifying payment...");
                 try {
                     const url = txRef
-                        ? `http://127.0.0.1:5000/api/payment/verify/${verifyId}?tx_ref=${txRef}`
-                        : `http://127.0.0.1:5000/api/payment/verify/${verifyId}`;
+                        ? `https://fenstore-backend-1.onrender.com/api/payment/verify/${verifyId}?tx_ref=${txRef}`
+                        : `https://fenstore-backend-1.onrender.com/api/payment/verify/${verifyId}`;
 
                     const response = await fetch(url);
                     const data = await response.json();
@@ -167,7 +167,7 @@ function OrdersList() {
         const payToast = toast.loading("Initializing payment...");
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://127.0.0.1:5000/api/payment/initialize", {
+            const response = await fetch("https://fenstore-backend-1.onrender.com/api/payment/initialize", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

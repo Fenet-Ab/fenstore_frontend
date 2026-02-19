@@ -51,13 +51,13 @@ export default function ProductDetail() {
             if (!params.id) return;
 
             // Fetch product details
-            const response = await fetch(`http://127.0.0.1:5000/api/material/${params.id}`);
+            const response = await fetch(`https://fenstore-backend-1.onrender.com/api/material/${params.id}`);
             if (!response.ok) throw new Error('Product not found');
             const data = await response.json();
             setProduct(data);
 
             // Fetch rating stats
-            const statsRes = await fetch(`http://127.0.0.1:5000/api/rating/material/${params.id}/stats`);
+            const statsRes = await fetch(`https://fenstore-backend-1.onrender.com/api/rating/material/${params.id}/stats`);
             if (statsRes.ok) {
                 const statsData = await statsRes.json();
                 setRatingStats(statsData);
@@ -66,7 +66,7 @@ export default function ProductDetail() {
             // Fetch user's existing rating if logged in
             const token = localStorage.getItem('token');
             if (token) {
-                const myRatingRes = await fetch(`http://127.0.0.1:5000/api/rating/my/${params.id}`, {
+                const myRatingRes = await fetch(`https://fenstore-backend-1.onrender.com/api/rating/my/${params.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (myRatingRes.ok) {
@@ -113,7 +113,7 @@ export default function ProductDetail() {
 
         setIsRating(true);
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/rating/${params.id}`, {
+            const response = await fetch(`https://fenstore-backend-1.onrender.com/api/rating/${params.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

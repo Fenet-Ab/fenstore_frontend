@@ -79,7 +79,7 @@ export default function UserDashboard() {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/notification", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/notification", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -94,7 +94,7 @@ export default function UserDashboard() {
     const markAsRead = async (id: string) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/notification/${id}/read`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/notification/${id}/read`, {
                 method: "PATCH",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -109,7 +109,7 @@ export default function UserDashboard() {
     const markAllRead = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/notification/read-all`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/notification/read-all`, {
                 method: "PATCH",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -126,7 +126,7 @@ export default function UserDashboard() {
         setDeleting(true);
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://127.0.0.1:5000/api/order/${deleteModal.orderId}`, {
+            const response = await fetch(`https://fenstore-backend-1.onrender.com/api/order/${deleteModal.orderId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -151,7 +151,7 @@ export default function UserDashboard() {
         setLoadingWishlist(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/like", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/like", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -175,7 +175,7 @@ export default function UserDashboard() {
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/profile/stats", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/profile/stats", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -192,7 +192,7 @@ export default function UserDashboard() {
     const fetchOrders = async (search: string = "") => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`http://127.0.0.1:5000/api/order/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
+            const res = await fetch(`https://fenstore-backend-1.onrender.com/api/order/all${search ? `?search=${encodeURIComponent(search)}` : ""}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -226,7 +226,7 @@ export default function UserDashboard() {
                 const headers = { Authorization: `Bearer ${token}` };
 
                 // Fetch Profile
-                const profileRes = await fetch("http://127.0.0.1:5000/api/profile", { headers });
+                const profileRes = await fetch("https://fenstore-backend-1.onrender.com/api/profile", { headers });
                 if (profileRes.ok) {
                     const profile = await profileRes.json();
                     setUserData(profile);

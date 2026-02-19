@@ -32,7 +32,7 @@ export default function Hero() {
     useEffect(() => {
         const fetchRecentProducts = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/material/recent-by-category", {
+                const res = await fetch("https://fenstore-backend-1.onrender.com/api/material/recent-by-category", {
                     cache: 'no-store'
                 });
                 console.log("Hero fetch status:", res.status);

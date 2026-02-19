@@ -18,7 +18,7 @@ export default function FloatingSupportChat() {
         setLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/support/messages", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/support/messages", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -61,7 +61,7 @@ export default function FloatingSupportChat() {
         setSending(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("http://127.0.0.1:5000/api/support/send", {
+            const res = await fetch("https://fenstore-backend-1.onrender.com/api/support/send", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

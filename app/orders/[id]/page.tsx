@@ -41,7 +41,7 @@ export default function OrderDetailsPage() {
             if (!isLoggedIn || !id) return;
             try {
                 const token = localStorage.getItem("token");
-                const response = await fetch(`http://127.0.0.1:5000/api/order/${id}`, {
+                const response = await fetch(`https://fenstore-backend-1.onrender.com/api/order/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -70,7 +70,7 @@ export default function OrderDetailsPage() {
         const payToast = toast.loading("Initializing payment...");
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://127.0.0.1:5000/api/payment/initialize", {
+            const response = await fetch("https://fenstore-backend-1.onrender.com/api/payment/initialize", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

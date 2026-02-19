@@ -64,7 +64,7 @@ export default function ProductModal({
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/category');
+            const response = await fetch('https://fenstore-backend-1.onrender.com/api/category');
             if (response.ok) {
                 const data = await response.json();
                 setCategories(data);
@@ -121,8 +121,8 @@ export default function ProductModal({
             }
 
             const url = mode === 'edit' && material
-                ? `http://127.0.0.1:5000/api/material/${material.id}`
-                : 'http://127.0.0.1:5000/api/material';
+                ? `https://fenstore-backend-1.onrender.com/api/material/${material.id}`
+                : 'https://fenstore-backend-1.onrender.com/api/material';
 
             const method = mode === 'edit' ? 'PUT' : 'POST';
 
@@ -165,7 +165,7 @@ export default function ProductModal({
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://127.0.0.1:5000/api/material/${material.id}`, {
+            const response = await fetch(`https://fenstore-backend-1.onrender.com/api/material/${material.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

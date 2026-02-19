@@ -84,7 +84,7 @@ export default function ProfilePage() {
             }
 
             try {
-                const response = await axios.get("http://127.0.0.1:5000/api/profile", {
+                const response = await axios.get("https://fenstore-backend-1.onrender.com/api/profile", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setProfile(response.data);
@@ -111,7 +111,7 @@ export default function ProfilePage() {
         if (!token) return;
 
         try {
-            await axios.put("http://127.0.0.1:5000/api/profile", formData, {
+            await axios.put("https://fenstore-backend-1.onrender.com/api/profile", formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProfile(prev => ({ ...prev!, ...formData }));
@@ -135,7 +135,7 @@ export default function ProfilePage() {
         if (!token) return;
 
         try {
-            await axios.delete("http://127.0.0.1:5000/api/profile", {
+            await axios.delete("https://fenstore-backend-1.onrender.com/api/profile", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setShowDeleteModal(false);

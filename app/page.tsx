@@ -29,7 +29,7 @@ export default function Home() {
   useEffect(() => {
     const fetchMaterials = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/material');
+        const response = await fetch('https://fenstore-backend-1.onrender.com/api/material');
         const data = await response.json();
         setMaterials(data);
       } catch (error) {

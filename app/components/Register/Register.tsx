@@ -45,7 +45,7 @@ const Register = ({ initialIsLogin = true }: RegisterProps) => {
     try {
       if (isLogin) {
         // ---- LOGIN ----
-        const res = await axios.post("http://127.0.0.1:5000/api/auth/login", {
+        const res = await axios.post("https://fenstore-backend-1.onrender.com/api/auth/login", {
           email: payload.email,
           password: payload.password,
         });
@@ -73,7 +73,7 @@ const Register = ({ initialIsLogin = true }: RegisterProps) => {
         }, 1500);
       } else {
         // ---- SIGNUP ----
-        const res = await axios.post("http://127.0.0.1:5000/api/auth/register", {
+        const res = await axios.post("https://fenstore-backend-1.onrender.com/api/auth/register", {
           name: payload.name,
           email: payload.email,
           password: payload.password,
