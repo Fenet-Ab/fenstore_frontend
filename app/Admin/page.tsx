@@ -25,6 +25,7 @@ import {
 import { useRouter } from "next/navigation";
 import ProductModal from "@/components/ProductModal";
 import ProductsList from "@/components/ProductsList";
+import StarRating from "@/app/components/StarRating/StarRating";
 import { toast } from "react-toastify";
 
 interface SidebarItemProps {
@@ -66,6 +67,10 @@ export default function AdminDashboard() {
     const [chatMessages, setChatMessages] = useState<any[]>([]);
     const [adminReply, setAdminReply] = useState("");
     const [isReplying, setIsReplying] = useState(false);
+    const [materials, setMaterials] = useState<any[]>([]);
+    const [materialsLoading, setMaterialsLoading] = useState(false);
+    const [topRated, setTopRated] = useState<any[]>([]);
+    const [topRatedLoading, setTopRatedLoading] = useState(false);
     const router = useRouter();
 
     const fetchNotifications = async () => {
@@ -116,6 +121,19 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setSidebarOpen(false);
+            } else {
+                setSidebarOpen(true);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
         // Check if user is authenticated
         const token = localStorage.getItem("token");
         if (!token) {
@@ -127,6 +145,8 @@ export default function AdminDashboard() {
         // Initial fetch for stats
         fetchOrders();
         fetchCustomers();
+        fetchMaterials();
+        fetchTopRated();
         fetchMarketShare();
         fetchNotifications();
 
@@ -160,8 +180,12 @@ export default function AdminDashboard() {
         return () => clearInterval(interval);
     }, []);
 
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
     const handleProductSuccess = () => {
-        console.log('Product operation successful');
+        setRefreshTrigger(prev => prev + 1);
+        fetchMaterials(); // Also update the dashboard stats
+        toast.success("Catalog updated successfully");
     };
 
     const fetchMarketShare = async () => {
@@ -242,6 +266,36 @@ export default function AdminDashboard() {
             console.error("Error fetching orders:", error);
         } finally {
             setOrdersLoading(false);
+        }
+    };
+
+    const fetchMaterials = async () => {
+        setMaterialsLoading(true);
+        try {
+            const res = await fetch('https://fenstore-backend-1.onrender.com/api/material');
+            if (res.ok) {
+                const data = await res.json();
+                setMaterials(data);
+            }
+        } catch (error) {
+            console.error("Error fetching materials:", error);
+        } finally {
+            setMaterialsLoading(false);
+        }
+    };
+
+    const fetchTopRated = async () => {
+        setTopRatedLoading(true);
+        try {
+            const res = await fetch('https://fenstore-backend-1.onrender.com/api/rating/top?limit=5');
+            if (res.ok) {
+                const data = await res.json();
+                setTopRated(data);
+            }
+        } catch (error) {
+            console.error("Error fetching top rated:", error);
+        } finally {
+            setTopRatedLoading(false);
         }
     };
 
@@ -333,33 +387,60 @@ export default function AdminDashboard() {
     };
 
     // Calculate total revenue from paid orders
-    const totalRevenue = orders
-        .filter(o => o.paymentStatus === "PAID")
-        .reduce((sum, order) => sum + order.totalPrice, 0);
+    const paidOrders = orders.filter(o => o.paymentStatus === "PAID");
+    const totalRevenue = paidOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    // Calculate growth (mock comparison for UI)
+    const now = new Date();
+    const thisMonth = paidOrders.filter(o => new Date(o.createdAt).getMonth() === now.getMonth());
+    const lastMonth = paidOrders.filter(o => new Date(o.createdAt).getMonth() === (now.getMonth() - 1 + 12) % 12);
+
+    const thisMonthRevenue = thisMonth.reduce((sum, o) => sum + o.totalPrice, 0);
+    const lastMonthRevenue = lastMonth.reduce((sum, o) => sum + o.totalPrice, 0);
+
+    let revenueGrowth = "+0%";
+    if (lastMonthRevenue > 0) {
+        const growth = ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+        revenueGrowth = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
+    } else if (thisMonthRevenue > 0) {
+        revenueGrowth = "+100%";
+    }
 
     const stats = [
         {
             title: "Total Revenue",
             value: `ETB ${totalRevenue.toLocaleString()}`,
-            change: "+20.1%",
-            isPositive: true,
+            change: revenueGrowth,
+            isPositive: !revenueGrowth.startsWith('-'),
             icon: <TrendingUp className="w-5 h-5 text-[#D4AF37]" />,
         },
         {
             title: "Active Orders",
             value: orders.filter(o => o.deliveryStatus !== "DELIVERED").length.toString(),
-            change: "+12.5%",
+            change: `+${orders.filter(o => {
+                const d = new Date(o.createdAt);
+                return (now.getTime() - d.getTime()) < 86400000;
+            }).length} today`,
             isPositive: true,
             icon: <Package className="w-5 h-5 text-[#D4AF37]" />,
         },
         {
             title: "Total Customers",
             value: customers.length.toString(),
-            change: "+18.2%",
+            change: `+${customers.filter(c => {
+                const d = new Date(c.createdAt);
+                return (now.getTime() - d.getTime()) < 604800000;
+            }).length} this week`,
             isPositive: true,
             icon: <Users className="w-5 h-5 text-[#D4AF37]" />,
         },
-
+        {
+            title: "Total Catalog",
+            value: materials.length.toString(),
+            change: `In ${Array.from(new Set(materials.map(m => m.category?.name))).length} categories`,
+            isPositive: true,
+            icon: <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />,
+        },
     ];
 
 
@@ -383,11 +464,19 @@ export default function AdminDashboard() {
         .slice(0, 5);
 
     return (
-        <div className="flex h-screen bg-[#0F0F0F] text-gray-100 overflow-hidden font-sans">
+        <div className="flex h-screen bg-[#0F0F0F] text-gray-100 overflow-hidden font-sans relative">
+            {/* Sidebar Overlay for Mobile */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] lg:hidden animate-in fade-in duration-300"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
             <aside
-                className={`${isSidebarOpen ? "w-64" : "w-20"
-                    } bg-[#161616] border-r border-gray-800 transition-all duration-300 flex flex-col z-20`}
+                className={`fixed inset-y-0 left-0 lg:static lg:block z-[50] ${isSidebarOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:w-20 lg:translate-x-0"
+                    } bg-[#161616] border-r border-gray-800 transition-all duration-300 flex flex-col overflow-hidden shadow-2xl lg:shadow-none`}
             >
                 <div className="p-6 flex items-center justify-between">
                     <div className={`flex items-center space-x-3 ${!isSidebarOpen && "hidden"}`}>
@@ -478,21 +567,38 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden relative z-10">
                 {/* Header */}
-                <header className="h-20 bg-[#161616] border-b border-gray-800 px-8 flex items-center justify-between">
-                    <div className="relative w-96 group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-[#D4AF37] transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search analytics, orders, products..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-[#0F0F0F] border border-gray-800 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/20 transition-all"
-                        />
+                <header className="h-20 bg-[#161616] border-b border-gray-800 px-4 lg:px-8 flex items-center justify-between z-[60] relative">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setSidebarOpen(!isSidebarOpen)}
+                            className="p-2 rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors text-gray-400 lg:hidden"
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
+
+                        <div className="relative hidden md:block w-96 group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-[#D4AF37] transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search analytics, orders, products..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-[#0F0F0F] border border-gray-800 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/20 transition-all"
+                            />
+                        </div>
+
+                        {/* Mobile Logo/Title (visible when sidebar is closed) */}
+                        <div className="md:hidden flex items-center gap-2">
+                            <div className="w-8 h-8 bg-[#D4AF37] rounded-lg flex items-center justify-center">
+                                <span className="text-black font-bold text-lg">F</span>
+                            </div>
+                            <span className="font-bold tracking-tight text-white">FenStore</span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-3 lg:space-x-6">
                         <div className="relative">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
@@ -503,65 +609,6 @@ export default function AdminDashboard() {
                                     <span className="absolute top-2 right-2 w-2 h-2 bg-[#D4AF37] rounded-full border-2 border-[#161616] animate-pulse"></span>
                                 )}
                             </button>
-
-                            {showNotifications && (
-                                <div className="absolute right-0 mt-4 w-96 bg-[#161616] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-800 overflow-hidden z-[100] animate-in slide-in-from-top-5 duration-200">
-                                    <div className="p-6 border-b border-gray-800 flex items-center justify-between bg-black/20">
-                                        <h3 className="text-lg font-bold tracking-tight text-white">System Alerts</h3>
-                                        <button
-                                            onClick={markAllRead}
-                                            className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] hover:underline"
-                                        >
-                                            Clear All
-                                        </button>
-                                    </div>
-                                    <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
-                                        {notifications.length > 0 ? (
-                                            notifications.map((n) => (
-                                                <div
-                                                    key={n.id}
-                                                    onClick={() => {
-                                                        markAsRead(n.id);
-                                                        if (n.link) {
-                                                            if (n.type === 'NEW_ORDER') {
-                                                                setActiveSection("orders");
-                                                                setShowNotifications(false);
-                                                            } else {
-                                                                router.push(n.link);
-                                                            }
-                                                        }
-                                                    }}
-                                                    className={`p-6 border-b border-gray-800/50 hover:bg-white/[0.03] cursor-pointer transition-colors relative group/noti ${!n.isRead ? "bg-[#D4AF37]/5" : ""}`}
-                                                >
-                                                    {!n.isRead && (
-                                                        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[#D4AF37] rounded-full"></div>
-                                                    )}
-                                                    <div className="flex justify-between items-start mb-1">
-                                                        <p className={`text-sm font-bold ${!n.isRead ? "text-white" : "text-gray-400"}`}>{n.title}</p>
-                                                        <span className="text-[9px] font-medium text-gray-500">{getRelativeTime(n.createdAt)}</span>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{n.message}</p>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="p-12 text-center">
-                                                <div className="w-16 h-16 bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-600">
-                                                    <Bell className="w-8 h-8" />
-                                                </div>
-                                                <p className="text-sm font-medium text-gray-500 italic">No new alerts detected.</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="p-4 bg-black/20 border-t border-gray-800 text-center">
-                                        <button
-                                            onClick={() => setShowNotifications(false)}
-                                            className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
-                                        >
-                                            Dismiss View
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                         <button
                             onClick={() => setIsProductModalOpen(true)}
@@ -574,14 +621,14 @@ export default function AdminDashboard() {
                 </header>
 
                 {/* Dashboard Content */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar bg-[#0A0A0A]">
+                <div className="flex-1 overflow-y-auto p-4 lg:p-12 space-y-8 custom-scrollbar bg-[#0A0A0A]">
 
                     {activeSection === "dashboard" && (
                         <>
-                            <div className="flex items-end justify-between">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                                 <div>
-                                    <h1 className="text-4xl font-bold tracking-tight text-white">Command Center</h1>
-                                    <p className="text-gray-400 mt-2 text-lg">Your business at a glance.</p>
+                                    <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white">Command Center</h1>
+                                    <p className="text-gray-400 mt-1 lg:mt-2 text-base lg:text-lg">Your business at a glance.</p>
                                 </div>
                                 <div className="flex space-x-4">
 
@@ -740,6 +787,37 @@ export default function AdminDashboard() {
                                 {/* Sidebar Cards */}
                                 <div className="space-y-8">
                                     <div className="bg-[#161616] rounded-3xl border border-gray-800/50 p-7 shadow-2xl">
+                                        <h2 className="text-xl font-extrabold text-white mb-8 tracking-tight">Top Rated</h2>
+                                        <div className="space-y-6">
+                                            {topRatedLoading ? (
+                                                <div className="flex flex-col items-center justify-center py-10">
+                                                    <div className="w-8 h-8 border-4 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin mb-3"></div>
+                                                </div>
+                                            ) : topRated.length === 0 ? (
+                                                <p className="text-gray-500 text-sm text-center py-8">No ratings yet.</p>
+                                            ) : (
+                                                topRated.map((item: any) => (
+                                                    <div key={item.id} className="flex items-center gap-4 group cursor-pointer hover:bg-white/[0.02] p-2 rounded-xl transition-all">
+                                                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-gray-800">
+                                                            <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-bold text-gray-200 truncate">{item.title}</p>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <StarRating rating={item.averageRating} size="sm" showCount={false} />
+                                                                <span className="text-[10px] text-gray-500 font-bold">({item.ratingCount})</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-xs font-black text-[#D4AF37]">{item.averageRating.toFixed(1)}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-[#161616] rounded-3xl border border-gray-800/50 p-7 shadow-2xl">
                                         <h2 className="text-xl font-extrabold text-white mb-8 tracking-tight">Market Share</h2>
                                         <div className="space-y-7">
                                             {marketShareLoading ? (
@@ -775,7 +853,7 @@ export default function AdminDashboard() {
                                     Create Item
                                 </button>
                             </div>
-                            <ProductsList searchQuery={searchQuery} />
+                            <ProductsList searchQuery={searchQuery} refreshTrigger={refreshTrigger} />
                         </div>
                     )}
 
@@ -1027,26 +1105,31 @@ export default function AdminDashboard() {
                                         ) : conversations.length === 0 ? (
                                             <div className="p-10 text-center text-gray-500 italic text-sm">No active inquiries.</div>
                                         ) : (
-                                            conversations.map((conv) => (
-                                                <div
-                                                    key={conv.userId}
-                                                    onClick={() => {
-                                                        setCurrentChatUser(conv.user);
-                                                        fetchChatMessages(conv.userId);
-                                                    }}
-                                                    className={`p-6 border-b border-gray-800/50 cursor-pointer transition-all hover:bg-white/[0.03] ${currentChatUser?.id === conv.userId ? 'bg-[#D4AF37]/10 border-l-4 border-l-[#D4AF37]' : ''}`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-[#D4AF37] font-black">
-                                                            {conv.user.name[0]}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-sm font-bold text-gray-200 truncate">{conv.user.name}</p>
-                                                            <p className="text-[10px] text-gray-500 truncate">{conv.message}</p>
+                                            conversations
+                                                .filter(conv =>
+                                                    conv.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                    conv.message.toLowerCase().includes(searchQuery.toLowerCase())
+                                                )
+                                                .map((conv) => (
+                                                    <div
+                                                        key={conv.userId}
+                                                        onClick={() => {
+                                                            setCurrentChatUser(conv.user);
+                                                            fetchChatMessages(conv.userId);
+                                                        }}
+                                                        className={`p-6 border-b border-gray-800/50 cursor-pointer transition-all hover:bg-white/[0.03] ${currentChatUser?.id === conv.userId ? 'bg-[#D4AF37]/10 border-l-4 border-l-[#D4AF37]' : ''}`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-[#D4AF37] font-black">
+                                                                {conv.user.name[0]}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-bold text-gray-200 truncate">{conv.user.name}</p>
+                                                                <p className="text-[10px] text-gray-500 truncate">{conv.message}</p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))
+                                                ))
                                         )}
                                     </div>
                                 </div>
@@ -1120,6 +1203,66 @@ export default function AdminDashboard() {
 
                 </div>
             </main>
+
+            {/* Global Notifications Panel (Moved here to fixed mobile z-index issue) */}
+            {showNotifications && (
+                <div className="fixed inset-x-4 lg:inset-auto lg:right-8 lg:top-24 mt-4 lg:mt-0 w-auto lg:w-96 bg-[#161616] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-800 overflow-hidden z-[200] animate-in slide-in-from-top-5 duration-200">
+                    <div className="p-6 border-b border-gray-800 flex items-center justify-between bg-black/20">
+                        <h3 className="text-lg font-bold tracking-tight text-white">System Alerts</h3>
+                        <button
+                            onClick={markAllRead}
+                            className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] hover:underline"
+                        >
+                            Clear All
+                        </button>
+                    </div>
+                    <div className="max-h-[60vh] sm:max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        {notifications.length > 0 ? (
+                            notifications.map((n) => (
+                                <div
+                                    key={n.id}
+                                    onClick={() => {
+                                        markAsRead(n.id);
+                                        if (n.link) {
+                                            if (n.type === 'NEW_ORDER') {
+                                                setActiveSection("orders");
+                                                setShowNotifications(false);
+                                            } else {
+                                                router.push(n.link);
+                                            }
+                                        }
+                                    }}
+                                    className={`p-6 border-b border-gray-800/50 hover:bg-white/[0.03] cursor-pointer transition-colors relative group/noti ${!n.isRead ? "bg-[#D4AF37]/5" : ""}`}
+                                >
+                                    {!n.isRead && (
+                                        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[#D4AF37] rounded-full"></div>
+                                    )}
+                                    <div className="flex justify-between items-start mb-1">
+                                        <p className={`text-sm font-bold ${!n.isRead ? "text-white" : "text-gray-400"}`}>{n.title}</p>
+                                        <span className="text-[9px] font-medium text-gray-500">{getRelativeTime(n.createdAt)}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{n.message}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="p-12 text-center">
+                                <div className="w-16 h-16 bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-600">
+                                    <Bell className="w-8 h-8" />
+                                </div>
+                                <p className="text-sm font-medium text-gray-500 italic">No new alerts detected.</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="p-4 bg-black/20 border-t border-gray-800 text-center">
+                        <button
+                            onClick={() => setShowNotifications(false)}
+                            className="text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
+                        >
+                            Dismiss View
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Product Modal */}
             <ProductModal
