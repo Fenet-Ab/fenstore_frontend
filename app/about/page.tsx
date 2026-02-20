@@ -125,14 +125,14 @@ export default function AboutPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                         {[
-                            { icon: <ShieldCheck />, title: "Authenticity", desc: "100% genuine products directly from global manufacturers." },
-                            { icon: <Zap />, title: "Express Flow", desc: "Dedicated logistics for priority ultra-fast delivery." },
-                            { icon: <Users />, title: "24/7 Support", desc: "Expert human assistance for every inquiry you have." },
-                            { icon: <Star />, title: "Curated Edits", desc: "Only the finest selection of premium items for you." }
+                            { icon: ShieldCheck, title: "Authenticity", desc: "100% genuine products directly from global manufacturers." },
+                            { icon: Zap, title: "Express Flow", desc: "Dedicated logistics for priority ultra-fast delivery." },
+                            { icon: Users, title: "24/7 Support", desc: "Expert human assistance for every inquiry you have." },
+                            { icon: Star, title: "Curated Edits", desc: "Only the finest selection of premium items for you." }
                         ].map((feature, i) => (
                             <div key={i} className="flex flex-col items-center text-center space-y-4 group">
                                 <div className="text-gray-300 group-hover:text-[#D4AF37] transition-colors duration-500">
-                                    {React.cloneElement(feature.icon as React.ReactElement, { className: "w-10 h-10" })}
+                                    <feature.icon className="w-10 h-10" />
                                 </div>
                                 <h4 className="text-lg font-black uppercase tracking-widest">{feature.title}</h4>
                                 <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-[200px]">{feature.desc}</p>
