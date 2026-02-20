@@ -21,11 +21,12 @@ interface Material {
     createdAt?: string;
 }
 
-interface ProductsListProps {
+export interface ProductsListProps {
     searchQuery?: string;
+    refreshTrigger?: number;
 }
 
-export default function ProductsList({ searchQuery = "" }: ProductsListProps) {
+export default function ProductsList({ searchQuery = "", refreshTrigger = 0 }: ProductsListProps) {
     const router = useRouter();
     const [materials, setMaterials] = useState<Material[]>([]);
     const [recentMaterials, setRecentMaterials] = useState<Material[]>([]);
@@ -36,7 +37,7 @@ export default function ProductsList({ searchQuery = "" }: ProductsListProps) {
 
     useEffect(() => {
         fetchMaterials();
-    }, []);
+    }, [refreshTrigger]);
 
     useEffect(() => {
         const filtered = materials.filter(m =>
